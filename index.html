@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON 控制面板</title>
+    <style>
+        body { background:#1e1e1e; color:#eee; font-family:sans-serif; padding:20px; }
+        input, select, button { font-size:16px; padding:6px; margin:4px; }
+        pre { background:#333; padding:10px; border-radius:5px; }
+    </style>
+</head>
+<body>
+    <h1>JSON 資料管理</h1>
+    <form id="addForm">
+        <label>插入位置：</label>
+        <select name="scope">
+            <option value="chatgpt">chatgpt（內層）</option>
+            <option value="root">root（最外層）</option>
+        </select><br>
+        <input name="key" placeholder="key" required>
+        <input name="value" placeholder="value" required>
+        <button type="submit">新增 / 修改</button>
+    </form>
+
+    <form id="deleteForm">
+        <label>刪除資料：</label>
+        <select name="scope">
+            <option value="chatgpt">chatgpt（內層）</option>
+            <option value="root">root（最外層）</option>
+        </select>
+        <input name="key" placeholder="key" required>
+        <button type="submit" style="background:#a00; color:white;">刪除</button>
+    </form>
+
+    <h2>目前資料：</h2>
+    <pre id="output">載入中...</pre>
+
+    <script>
+        async function refresh() {
+            const res = await fetch('/get');
+            const data = await res.json();
+            document.getElementById('output').textContent = JSON.stringify(data, null, 4);
+        }
+
+        document.getElementById('addForm').onsubmit = async e => {
+            e.preventDefault();
+            const form = new FormData(e.target);
+            await fetch('/add', {method:'POST', body:form});
+            await refresh();
+        }
+
+        document.getElementById('deleteForm').onsubmit = async e => {
+            e.preventDefault();
+            const form = new FormData(e.target);
+            await fetch('/delete', {method:'POST', body:form});
+            await refresh();
+        }
+
+        refresh();
+    </script>
+</body>
+</html>
